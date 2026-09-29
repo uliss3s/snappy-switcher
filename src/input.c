@@ -538,6 +538,9 @@ const struct wl_keyboard_listener *get_keyboard_listener(void) {
 
 static double ptr_x = 0, ptr_y = 0;
 static int pressed_index = -1;
+/* Card currently under the cursor. Hover only selects when this changes,
+ * so sensor jitter within one card can't undo a keyboard/IPC selection. */
+static int hover_index = -1;
 
 static struct wl_cursor_theme *cursor_theme = NULL;
 static struct wl_cursor_image *cursor_image = NULL;
@@ -606,7 +609,10 @@ static void pointer_enter(void *data, struct wl_pointer *pointer,
 
   /* Deliberately NOT changing the selection here: if the popup opens under
    * a resting cursor, the keyboard's default selection must win until the
-   * mouse actually moves. */
+   * mouse moves onto a different card. */
+  hover_index = app_state ? render_hit_test(app_state, app_state->width,
+                                            app_state->height, ptr_x, ptr_y)
+                          : -1;
 
   if (cursor_load())
     wl_pointer_set_cursor(pointer, serial, cursor_surface,
@@ -621,6 +627,7 @@ static void pointer_leave(void *data, struct wl_pointer *pointer,
   (void)serial;
   (void)surf;
   pressed_index = -1;
+  hover_index = -1;
 }
 
 static void pointer_motion(void *data, struct wl_pointer *pointer,
@@ -629,19 +636,17 @@ static void pointer_motion(void *data, struct wl_pointer *pointer,
   (void)time;
   app_state = (AppState *)data;
 
-  double x = wl_fixed_to_double(sx);
-  double y = wl_fixed_to_double(sy);
-  /* Some compositors echo the enter position as a motion event */
-  if (x == ptr_x && y == ptr_y)
-    return;
-  ptr_x = x;
-  ptr_y = y;
+  ptr_x = wl_fixed_to_double(sx);
+  ptr_y = wl_fixed_to_double(sy);
 
   if (!app_state)
     return;
 
   int idx = render_hit_test(app_state, app_state->width, app_state->height,
                             ptr_x, ptr_y);
+  if (idx == hover_index)
+    return;
+  hover_index = idx;
   if (idx >= 0 && idx != app_state->selected_index) {
     app_state->selected_index = idx;
     app_state->needs_render = true;
