@@ -222,6 +222,8 @@ static void registry_global(void *data, struct wl_registry *registry,
     layer_shell =
         wl_registry_bind(registry, name, &zwlr_layer_shell_v1_interface, 1);
   else if (strcmp(interface, wl_seat_interface.name) == 0) {
+    /* Bumping this version requires handlers for the newer wl_pointer
+     * events in input.c's pointer_listener, or libwayland calls NULL. */
     seat = wl_registry_bind(registry, name, &wl_seat_interface, 4);
     wl_seat_add_listener(seat, &seat_listener, state);
   } else if (strcmp(interface, wl_output_interface.name) == 0) {
