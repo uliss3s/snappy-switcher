@@ -416,6 +416,11 @@ static void show_switcher(bool is_linear) {
   clock_gettime(CLOCK_MONOTONIC, &watchdog_timestamp);
   watchdog_active = true;
 
+  /* Don't draw until the compositor has configured the new size. A buffer
+   * committed while the last acked configure is still the 1x1 placeholder
+   * can leave Hyprland ignoring every later commit, freezing the popup on
+   * its first frame. The configure handler sets needs_render. */
+  is_configured = false;
   wl_surface_set_buffer_scale(surface, output_scale);
   wl_surface_commit(surface);
   wl_display_flush(display);
