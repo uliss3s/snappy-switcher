@@ -49,6 +49,7 @@ struct wl_seat *seat = NULL;
 int output_scale = 1;
 struct wl_keyboard *keyboard = NULL;
 struct wl_pointer *pointer = NULL;
+static uint32_t seat_caps = 0;
 
 static bool running = true;
 static bool visible = false;
@@ -116,6 +117,24 @@ static const struct zwlr_layer_surface_v1_listener layer_surface_listener = {
     .closed = layer_surface_closed,
 };
 
+/* Pointer is optional: hover/click on cards is an extra way to pick a
+ * window alongside the keyboard, enabled by mouse_support. Called on seat
+ * capability changes and on config reload, so it acquires or releases the
+ * wl_pointer whenever either the capability or the setting changes. */
+static void update_pointer(AppState *state) {
+  bool want = (seat_caps & WL_SEAT_CAPABILITY_POINTER) &&
+              (config && config->mouse_support);
+  if (want && !pointer) {
+    pointer = wl_seat_get_pointer(seat);
+    wl_pointer_add_listener(pointer, get_pointer_listener(), state);
+    LOG("Pointer listener attached");
+  } else if (!want && pointer) {
+    wl_pointer_release(pointer);
+    pointer = NULL;
+    LOG("Pointer listener released");
+  }
+}
+
 static void seat_capabilities(void *data, struct wl_seat *wl_seat,
                               uint32_t caps) {
   (void)wl_seat;
@@ -135,17 +154,8 @@ static void seat_capabilities(void *data, struct wl_seat *wl_seat,
     LOG("Keyboard listener released (seat lost keyboard capability)");
   }
 
-  /* Pointer is optional: hover/click on cards is an extra way to pick a
-   * window alongside the keyboard. Same acquire/release dance as above. */
-  if ((caps & WL_SEAT_CAPABILITY_POINTER) && !pointer) {
-    pointer = wl_seat_get_pointer(seat);
-    wl_pointer_add_listener(pointer, get_pointer_listener(), state);
-    LOG("Pointer listener attached");
-  } else if (!(caps & WL_SEAT_CAPABILITY_POINTER) && pointer) {
-    wl_pointer_release(pointer);
-    pointer = NULL;
-    LOG("Pointer listener released (seat lost pointer capability)");
-  }
+  seat_caps = caps;
+  update_pointer(state);
 }
 
 static void seat_name(void *data, struct wl_seat *wl_seat, const char *name) {
@@ -632,6 +642,7 @@ static void handle_command(const char *payload) {
     config = load_config_from(path_buf); /* path buf will be NULL if none provided */
     render_set_config(config);
     icons_init(config->icon_theme, config->icon_fallback);
+    update_pointer(&app_state);
     return;
   }
 
