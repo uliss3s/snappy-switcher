@@ -48,6 +48,8 @@ struct wl_seat *seat = NULL;
 
 int output_scale = 1;
 struct wl_keyboard *keyboard = NULL;
+struct wl_pointer *pointer = NULL;
+static uint32_t seat_caps = 0;
 
 static bool running = true;
 static bool visible = false;
@@ -115,6 +117,24 @@ static const struct zwlr_layer_surface_v1_listener layer_surface_listener = {
     .closed = layer_surface_closed,
 };
 
+/* Pointer is optional: hover/click on cards is an extra way to pick a
+ * window alongside the keyboard, enabled by mouse_support. Called on seat
+ * capability changes and on config reload, so it acquires or releases the
+ * wl_pointer whenever either the capability or the setting changes. */
+static void update_pointer(AppState *state) {
+  bool want = (seat_caps & WL_SEAT_CAPABILITY_POINTER) &&
+              (config && config->mouse_support);
+  if (want && !pointer) {
+    pointer = wl_seat_get_pointer(seat);
+    wl_pointer_add_listener(pointer, get_pointer_listener(), state);
+    LOG("Pointer listener attached");
+  } else if (!want && pointer) {
+    wl_pointer_release(pointer);
+    pointer = NULL;
+    LOG("Pointer listener released");
+  }
+}
+
 static void seat_capabilities(void *data, struct wl_seat *wl_seat,
                               uint32_t caps) {
   (void)wl_seat;
@@ -133,6 +153,9 @@ static void seat_capabilities(void *data, struct wl_seat *wl_seat,
     keyboard = NULL;
     LOG("Keyboard listener released (seat lost keyboard capability)");
   }
+
+  seat_caps = caps;
+  update_pointer(state);
 }
 
 static void seat_name(void *data, struct wl_seat *wl_seat, const char *name) {
@@ -209,6 +232,8 @@ static void registry_global(void *data, struct wl_registry *registry,
     layer_shell =
         wl_registry_bind(registry, name, &zwlr_layer_shell_v1_interface, 1);
   else if (strcmp(interface, wl_seat_interface.name) == 0) {
+    /* Bumping this version requires handlers for the newer wl_pointer
+     * events in input.c's pointer_listener, or libwayland calls NULL. */
     seat = wl_registry_bind(registry, name, &wl_seat_interface, 4);
     wl_seat_add_listener(seat, &seat_listener, state);
   } else if (strcmp(interface, wl_output_interface.name) == 0) {
@@ -403,6 +428,11 @@ static void show_switcher(bool is_linear) {
   clock_gettime(CLOCK_MONOTONIC, &watchdog_timestamp);
   watchdog_active = true;
 
+  /* Don't draw until the compositor has configured the new size. A buffer
+   * committed while the last acked configure is still the 1x1 placeholder
+   * can leave Hyprland ignoring every later commit, freezing the popup on
+   * its first frame. The configure handler sets needs_render. */
+  is_configured = false;
   wl_surface_set_buffer_scale(surface, output_scale);
   wl_surface_commit(surface);
   wl_display_flush(display);
@@ -612,6 +642,7 @@ static void handle_command(const char *payload) {
     config = load_config_from(path_buf); /* path buf will be NULL if none provided */
     render_set_config(config);
     icons_init(config->icon_theme, config->icon_fallback);
+    update_pointer(&app_state);
     return;
   }
 
@@ -1028,6 +1059,8 @@ static int run_daemon(const char *config_path) {
     wl_surface_destroy(surface);
   if (keyboard)
     wl_keyboard_destroy(keyboard);
+  if (pointer)
+    wl_pointer_destroy(pointer);
   if (output)
     wl_output_destroy(output);
   if (seat)
