@@ -641,6 +641,7 @@ static void handle_command(const char *payload) {
     render_set_config(config);
     icons_init(config->icon_theme, config->icon_fallback);
     input_set_group_cycle_key(config->group_cycle_key);
+    input_set_group_cycle_button(config->group_cycle_button);
     update_pointer(&app_state);
     return;
   }
@@ -795,6 +796,7 @@ static int run_daemon(const char *config_path) {
   render_set_config(config);
   icons_init(config->icon_theme, config->icon_fallback);
   input_set_group_cycle_key(config->group_cycle_key);
+  input_set_group_cycle_button(config->group_cycle_button);
   /* dismiss_modifier is now set dynamically per-command via IPC */
   app_state_init(&app_state);
 

@@ -609,14 +609,36 @@ const struct wl_keyboard_listener *get_keyboard_listener(void) {
 
 /* --- Pointer (mouse) input ---
  * Hover highlights the card under the cursor; a left click (press and
- * release on the same card) switches to it. Purely additive: the keyboard
- * path is untouched and both can be used within the same session. */
+ * release on the same card) switches to it, and group_cycle_button (right
+ * by default) cycles a group card's window like the group cycle key. Purely
+ * additive: the keyboard path is untouched and both can be used within the
+ * same session. */
 
 static double ptr_x = 0, ptr_y = 0;
 static int pressed_index = -1;
+static uint32_t pressed_button = 0;
+static uint32_t cycle_button = BTN_RIGHT; /* 0 = disabled */
+
 /* Card currently under the cursor. Hover only selects when this changes,
  * so sensor jitter within one card can't undo a keyboard/IPC selection. */
 static int hover_index = -1;
+
+void input_set_group_cycle_button(const char *name) {
+  if (!name || !*name || strcasecmp(name, "right") == 0)
+    cycle_button = BTN_RIGHT;
+  else if (strcasecmp(name, "middle") == 0)
+    cycle_button = BTN_MIDDLE;
+  else if (strcasecmp(name, "side") == 0 || strcasecmp(name, "back") == 0)
+    cycle_button = BTN_SIDE;
+  else if (strcasecmp(name, "extra") == 0 || strcasecmp(name, "forward") == 0)
+    cycle_button = BTN_EXTRA;
+  else if (strcasecmp(name, "none") == 0)
+    cycle_button = 0;
+  else {
+    LOG("WARNING: Unknown group_cycle_button '%s', using right", name);
+    cycle_button = BTN_RIGHT;
+  }
+}
 
 static struct wl_cursor_theme *cursor_theme = NULL;
 static struct wl_cursor_image *cursor_image = NULL;
@@ -735,7 +757,7 @@ static void pointer_button(void *data, struct wl_pointer *pointer,
   (void)time;
   app_state = (AppState *)data;
 
-  if (button != BTN_LEFT || !app_state)
+  if (!app_state || (button != BTN_LEFT && button != cycle_button))
     return;
 
   int idx = render_hit_test(app_state, app_state->width, app_state->height,
@@ -743,14 +765,20 @@ static void pointer_button(void *data, struct wl_pointer *pointer,
 
   if (state_w == WL_POINTER_BUTTON_STATE_PRESSED) {
     pressed_index = idx;
+    pressed_button = button;
     return;
   }
 
-  /* Switch on release so the release never lands on the window beneath */
-  if (idx >= 0 && idx == pressed_index) {
+  /* Act on release so the release never lands on the window beneath */
+  if (idx >= 0 && idx == pressed_index && button == pressed_button) {
     app_state->selected_index = idx;
-    if (on_alt_release)
-      on_alt_release();
+    if (button == BTN_LEFT) {
+      if (on_alt_release)
+        on_alt_release();
+    } else {
+      cycle_group(idx);
+      app_state->needs_render = true;
+    }
   }
   pressed_index = -1;
 }
