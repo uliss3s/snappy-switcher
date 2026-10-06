@@ -130,14 +130,48 @@ void app_state_init(AppState *state) {
   state->filter_workspace = false;
 }
 
+static void group_members_free(WindowInfo *info) {
+  if (info->members) {
+    for (int i = 0; i < info->group_count; i++) {
+      free(info->members[i].address);
+      free(info->members[i].title);
+    }
+    free(info->members);
+    info->members = NULL;
+  }
+}
+
 void window_info_free(WindowInfo *info) {
   if (info) {
     free(info->address);
     free(info->title);
     free(info->class_name);
     free(info->workspace_name);
+    group_members_free(info);
     memset(info, 0, sizeof(WindowInfo));
   }
+}
+
+bool window_info_cycle_group(WindowInfo *info, int step) {
+  if (!info || !info->members || info->group_count < 2)
+    return false;
+
+  int n = info->group_count;
+  int next = ((info->member_index + step) % n + n) % n;
+  char *address = strdup(info->members[next].address);
+  char *title = strdup(info->members[next].title);
+  if (!address || !title) {
+    free(address);
+    free(title);
+    return false;
+  }
+
+  free(info->address);
+  free(info->title);
+  info->address = address;
+  info->title = title;
+  info->member_index = next;
+  return true;
 }
 
 void app_state_free(AppState *state) {
@@ -397,6 +431,8 @@ static int parse_clients(const char *json_str, AppState *state, int target_ws,
     info.is_floating = floating ? json_object_get_boolean(floating) : false;
     info.is_pinned = is_pinned;
     info.group_count = 1;
+    info.members = NULL;
+    info.member_index = 0;
 
     app_state_add(state, &info);
   }
@@ -406,6 +442,23 @@ static int parse_clients(const char *json_str, AppState *state, int target_ws,
 }
 
 /* --- Aggregation (Context Mode) --- */
+
+/* Record win as the next member of group card. On allocation failure the
+ * card just loses its member list (it still switches to its face window). */
+static void group_add_member(WindowInfo *card, const WindowInfo *win) {
+  if (!card->members)
+    return;
+  GroupMember *m =
+      realloc(card->members, (card->group_count + 1) * sizeof(GroupMember));
+  if (!m) {
+    group_members_free(card);
+    return;
+  }
+  card->members = m;
+  m[card->group_count].address = safe_strdup(win->address);
+  m[card->group_count].title = safe_strdup(win->title);
+}
+
 static void aggregate_context(AppState *state) {
   if (state->count <= 1)
     return;
@@ -430,6 +483,8 @@ static void aggregate_context(AppState *state) {
       out[out_count].is_floating = true;
       out[out_count].is_pinned = win->is_pinned;
       out[out_count].group_count = 1;
+      out[out_count].members = NULL;
+      out[out_count].member_index = 0;
       out_count++;
     } else {
       int found = -1;
@@ -442,6 +497,7 @@ static void aggregate_context(AppState *state) {
       }
 
       if (found >= 0) {
+        group_add_member(&out[found], win);
         out[found].group_count++;
       } else {
         out[out_count].address = safe_strdup(win->address);
@@ -454,6 +510,13 @@ static void aggregate_context(AppState *state) {
         out[out_count].is_floating = false;
         out[out_count].is_pinned = win->is_pinned;
         out[out_count].group_count = 1;
+        /* The face is member 0; the rest are appended in MRU order */
+        out[out_count].members = malloc(sizeof(GroupMember));
+        if (out[out_count].members) {
+          out[out_count].members[0].address = safe_strdup(win->address);
+          out[out_count].members[0].title = safe_strdup(win->title);
+        }
+        out[out_count].member_index = 0;
         out_count++;
       }
     }
@@ -462,6 +525,12 @@ static void aggregate_context(AppState *state) {
   for (int i = 0; i < count; i++)
     window_info_free(&state->windows[i]);
   free(state->windows);
+
+  /* Only real groups need a member list */
+  for (int i = 0; i < out_count; i++) {
+    if (out[i].group_count < 2)
+      group_members_free(&out[i]);
+  }
 
   state->windows = out;
   state->count = out_count;

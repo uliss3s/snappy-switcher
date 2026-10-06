@@ -63,6 +63,8 @@ typedef struct {
   bool ignore_pinned;  /* Exclude pinned (always-on-top, all-workspace) windows, e.g. PiP */
   bool ignore_special; /* Exclude windows on special (scratchpad) workspaces */
   bool mouse_support;  /* Hover/click on cards to select and switch */
+  char group_cycle_key[32]; /* Key cycling a group card's window: "above_tab",
+                               an XKB keysym name, or "none" */
 
 } Config;
 

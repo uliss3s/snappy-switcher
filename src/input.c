@@ -35,12 +35,83 @@ static DismissType dismiss_type = DISMISS_TYPE_MODIFIER;
 static xkb_keysym_t dismiss_keysym = XKB_KEY_NoSymbol;
 static bool enter_primed_modifier = false;
 
+/* Group cycle key: the physical key above Tab, any keysym, or disabled */
+typedef enum { CYCLE_KEY_NONE, CYCLE_KEY_ABOVE_TAB, CYCLE_KEY_KEYSYM } CycleKeyType;
+static CycleKeyType cycle_key_type = CYCLE_KEY_ABOVE_TAB;
+static xkb_keysym_t cycle_keysym = XKB_KEY_NoSymbol;
+
 alt_release_callback_t on_alt_release = NULL;
 alt_release_callback_t on_escape = NULL;
 static AppState *app_state = NULL;
 
 /* Forward declaration: used by keyboard_enter before definition */
 static bool any_dismiss_mod_held(void);
+
+void input_set_group_cycle_key(const char *name) {
+  cycle_keysym = XKB_KEY_NoSymbol;
+  if (!name || !*name || strcasecmp(name, "above_tab") == 0) {
+    cycle_key_type = CYCLE_KEY_ABOVE_TAB;
+  } else if (strcasecmp(name, "none") == 0) {
+    cycle_key_type = CYCLE_KEY_NONE;
+  } else {
+    cycle_keysym = xkb_keysym_from_name(name, XKB_KEYSYM_CASE_INSENSITIVE);
+    if (cycle_keysym != XKB_KEY_NoSymbol) {
+      cycle_key_type = CYCLE_KEY_KEYSYM;
+    } else {
+      LOG("WARNING: Unknown group_cycle_key '%s', using above_tab", name);
+      cycle_key_type = CYCLE_KEY_ABOVE_TAB;
+    }
+  }
+}
+
+/* Whether a key press is the group cycle key. Keysyms are compared on the
+ * key's base level so Shift (cycle backward) doesn't change the match. */
+static bool is_group_cycle_key(uint32_t key, xkb_keysym_t sym) {
+  /* The dismiss key keeps its meaning */
+  if (dismiss_type == DISMISS_TYPE_KEYCODE && sym == dismiss_keysym)
+    return false;
+
+  switch (cycle_key_type) {
+  case CYCLE_KEY_ABOVE_TAB:
+    return key == KEY_GRAVE;
+  case CYCLE_KEY_KEYSYM: {
+    if (sym == cycle_keysym)
+      return true;
+    const xkb_keysym_t *syms = NULL;
+    xkb_layout_index_t layout = xkb_state_key_get_layout(xkb_st, key + 8);
+    int n = xkb_keymap_key_get_syms_by_level(xkb_keymap, key + 8, layout, 0,
+                                             &syms);
+    for (int i = 0; i < n; i++)
+      if (syms[i] == cycle_keysym)
+        return true;
+    return false;
+  }
+  default:
+    return false;
+  }
+}
+
+/* Step through the windows of a Context Mode group card. Shift reverses
+ * the direction, unless Shift is itself the held dismiss modifier. */
+static void cycle_group(int idx) {
+  if (!app_state || idx < 0 || idx >= app_state->count)
+    return;
+
+  int step = 1;
+  if (xkb_st &&
+      xkb_state_mod_name_is_active(xkb_st, XKB_MOD_NAME_SHIFT,
+                                   XKB_STATE_MODS_EFFECTIVE)) {
+    bool shift_dismisses = false;
+    for (int i = 0; i < dismiss_mod_count; i++)
+      if (strcmp(dismiss_mod_names[i], "Shift") == 0)
+        shift_dismisses = true;
+    if (!shift_dismisses)
+      step = -1;
+  }
+
+  if (window_info_cycle_group(&app_state->windows[idx], step))
+    app_state->needs_render = true;
+}
 
 /* Classify a dismiss key name.
  * Returns true if it's a standard XKB modifier (sets *out_xkb to the XKB name).
@@ -338,6 +409,11 @@ static void keyboard_key(void *data, struct wl_keyboard *keyboard,
   /* Only process navigation on key press */
   if (state_w != WL_KEYBOARD_KEY_STATE_PRESSED)
     return;
+
+  if (is_group_cycle_key(key, sym)) {
+    cycle_group(app_state->selected_index);
+    return;
+  }
 
   switch (sym) {
   case XKB_KEY_Tab:

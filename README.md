@@ -34,7 +34,7 @@
 
 | Feature | Description |
 |---------|-------------|
-| **Context Grouping** | Tiled windows sharing the same workspace + app class are collapsed into a single card with a count badge. Floating windows are never grouped. |
+| **Context Grouping** | Tiled windows sharing the same workspace + app class are collapsed into a single card with a position badge (`1/3`). Press the key above Tab (Shift to go backward; configurable via `group_cycle_key`) to pick another window of the selected group. Floating windows are never grouped. |
 | **Dynamic Pango UI** | Cairo/Pango rendering pipeline with automatic grid scaling, HiDPI support, SVG/PNG icon resolution, and configurable workspace badges. |
 | **Silent & Linear Routing** | `--silent` performs an instant MRU switch without ever creating a Wayland surface. `--linear` bypasses MRU for deterministic workspace/address cycling. Combinable. |
 | **Dual-Track Dismiss** | Dismiss-on-release supports both XKB modifier masks (`alt`, `super`, `ctrl`, `shift`) and raw keycode tracking (`space`, `1`, `Return`, etc.). |
@@ -210,7 +210,7 @@ bindd = SUPER, Tab, Snappy Switcher Workspace Next, exec, snappy-switcher next -
 
 ### 3. Done
 
-Press your configured bind to see it in action. Navigate with Tab / arrow keys, or set `mouse_support = true` to hover a card with the mouse and left-click it to switch.
+Press your configured bind to see it in action. Navigate with Tab / arrow keys and press the key above Tab (`` ` `` on US layouts) on a grouped card to pick another window of the group (Shift goes back). Optionally, set `mouse_support = true` to hover a card with the mouse and left-click it to switch.
 
 ---
 

@@ -112,6 +112,7 @@ flowchart LR
 | `sticky_mode` | `true`, `false` | `false` | When true, opening the switcher retains focus on the currently active window instead of immediately jumping to the previous window. |
 | `ignore_pinned` | `true`, `false` | `false` | Exclude pinned (always-on-top, all-workspace) windows like PiP from the switcher. |
 | `ignore_special` | `true`, `false` | `true` | Exclude windows on special (scratchpad) workspaces. Covers both unnamed (`special`) and named (`special:term`, `special:magic`, etc.) workspaces. |
+| `group_cycle_key` | `above_tab`, any XKB key name, `none` | `above_tab` | Key that cycles the selected group card through its windows (Shift goes backward). `above_tab` is the physical key above Tab on any layout (`` ` `` on US, `'` on ABNT2). Any XKB keysym name works too, e.g. `space` or `grave`. Setting it to a navigation key (Tab, arrows, Return, Escape) replaces that key's function. |
 | `mouse_support` | `true`, `false` | `false` | Hover a card to highlight it and left-click to switch to it. When `false`, the popup ignores the pointer. |
 
 ### Mode Comparison
@@ -125,6 +126,8 @@ flowchart LR
 [general]
 mode = context  # Enable intelligent grouping
 ```
+
+A group card switches to the group's most recently used window. To pick another one, press the **key above Tab** while the card is selected (hold **Shift** to go backward; change the key with `group_cycle_key`); the card's title follows, and its badge shows the position, e.g. `2/3`.
 
 ### Workspace Badge
 
@@ -415,6 +418,8 @@ hl.bind("SPACE + Tab", hl.dsp.exec_cmd("snappy-switcher next --mod space"))
 ```
 
 This uses keycode tracking instead of XKB modifier tracking. See [ARCHITECTURE.md](ARCHITECTURE.md) for details on the dual-track dismiss system.
+
+If the dismiss key is also your `group_cycle_key`, it acts only as the dismiss key.
 
 **Important:** The `--mod` value must match the key in the bind. If you bind `ALT + Tab` but pass `--mod space`, the switcher will show a CONFIG ERROR banner because Space is not being held.
 

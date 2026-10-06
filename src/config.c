@@ -22,6 +22,7 @@ static void set_defaults(Config *cfg) {
   cfg->ignore_pinned = false;
   cfg->ignore_special = true;
   cfg->mouse_support = false;
+  strncpy(cfg->group_cycle_key, "above_tab", sizeof(cfg->group_cycle_key) - 1);
   /* Default Fallback / Debug Colors (0xRRGGBBAA) */
   cfg->background = 0xff0000ff;
   cfg->card_bg = 0x0000ffff;
@@ -120,6 +121,8 @@ static void apply_value(Config *cfg, const char *section, const char *key,
     } else if (strcasecmp(key, "mouse_support") == 0) {
       cfg->mouse_support =
           (strcasecmp(val, "true") == 0 || strcmp(val, "1") == 0);
+    } else if (strcasecmp(key, "group_cycle_key") == 0) {
+      strncpy(cfg->group_cycle_key, val, sizeof(cfg->group_cycle_key) - 1);
     }
   }
   /* Colors (from theme or manual override) */
