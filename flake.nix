@@ -25,7 +25,7 @@
         packages = rec {
           snappy-switcher = pkgs.stdenv.mkDerivation {
             pname = "snappy-switcher";
-            version = "4.5.0.1";
+            version = "4.5.0.2";
 
             src = pkgs.lib.cleanSource ./.;
 

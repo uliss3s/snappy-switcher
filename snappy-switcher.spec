@@ -2,7 +2,7 @@
 # For Fedora Copr / RHEL / openSUSE
 
 Name:           snappy-switcher
-Version:        4.5.0.1
+Version:        4.5.0.2
 Release:        1%{?dist}
 Summary:        A fast, animated Alt+Tab window switcher for Hyprland
 
@@ -95,6 +95,11 @@ install -Dpm 644 snappy-switcher.service %{buildroot}%{_userunitdir}/snappy-swit
 %{_userunitdir}/snappy-switcher.service
 
 %changelog
+* Tue Oct 06 2026 Ulisses <urssilva@gmail.com> - 4.5.0.2
+- Cycle through the windows of a context-mode group (group_cycle_key)
+- Cycle groups with a configurable mouse button (group_cycle_button)
+- Group card badges show the position (2/3) instead of only the count
+
 * Tue Oct 06 2026 Ulisses <urssilva@gmail.com> - 4.5.0.1
 - Fork of OpalAayan/snappy-switcher 4.5.0
 - Added optional mouse support (mouse_support = true)
