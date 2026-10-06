@@ -425,8 +425,14 @@ static void draw_card(cairo_t *cr, WindowInfo *win, double x, double y,
 
   /* Badge (Count) — dynamically sized rounded square */
   if (win->group_count > 1) {
-    char count[12];
-    snprintf(count, sizeof(count), "%d", win->group_count);
+    /* Space cycles a group, so show which member the card is on ("2/3")
+     * instead of just the count */
+    char count[24];
+    if (win->members)
+      snprintf(count, sizeof(count), "%d/%d", win->member_index + 1,
+               win->group_count);
+    else
+      snprintf(count, sizeof(count), "%d", win->group_count);
 
     PangoLayout *bl = create_layout(cr, 10);
     pango_layout_set_text(bl, count, -1);

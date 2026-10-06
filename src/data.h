@@ -6,6 +6,12 @@
 #include <stdint.h>
 #include <wayland-client.h>
 
+/* A window folded into a Context Mode group card */
+typedef struct {
+  char *address;
+  char *title;
+} GroupMember;
+
 /* Information about a single window */
 typedef struct {
   char *address;        /* Window address (hex string) */
@@ -18,6 +24,9 @@ typedef struct {
   bool is_floating;     /* Whether this window is floating (not tiled) */
   bool is_pinned;       /* Whether this window is pinned (shown on all workspaces, always on top) */
   int group_count;      /* Number of windows in this group */
+  GroupMember *members; /* All group_count windows of a group in MRU order,
+                           or NULL for a single window */
+  int member_index;     /* Member the card currently shows (address/title) */
 } WindowInfo;
 
 /* A single in-flight Wayland buffer and its backing resources.
@@ -67,5 +76,10 @@ void app_state_free(AppState *state);
 
 /* Free a single WindowInfo's strings */
 void window_info_free(WindowInfo *info);
+
+/* Make a group card show (and switch to) another window of its group:
+ * step = 1 for the next one, -1 for the previous one (wrapping around).
+ * Returns false if the card is not a group or on allocation failure. */
+bool window_info_cycle_group(WindowInfo *info, int step);
 
 #endif /* DATA_H */

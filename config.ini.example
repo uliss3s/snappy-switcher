@@ -19,6 +19,7 @@
 # View Mode: How windows are displayed
 #   overview = Show all windows individually (simple)
 #   context  = Group tiled windows by workspace+app (power user)
+#              (group_cycle_key below picks another window of a group)
 mode = context
 
 # The panel position whether to follow the focus of your monitor
@@ -51,6 +52,14 @@ ignore_special = true
 # true  = mouse works alongside the keyboard
 # false = keyboard only; the popup ignores the pointer entirely (default)
 mouse_support = false
+
+# Key that cycles the selected group card (context mode) through its windows;
+# hold Shift to go backward
+#   above_tab = the physical key above Tab, whatever the layout
+#               (` on US, ' on Brazilian ABNT2) (default)
+#   <keysym>  = any XKB key name, e.g. space, grave, apostrophe, q
+#   none      = disabled
+group_cycle_key = above_tab
 
 # ┌───────────────────────────────────────────────────────────────────────────┐
 # │                              THEME SETTINGS                               │

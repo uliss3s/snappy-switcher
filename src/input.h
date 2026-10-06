@@ -26,6 +26,11 @@ void input_set_dismiss_modifier(const char *mod);
  * Used when the switcher is opened via CMD_TOGGLE (no modifier held). */
 void input_set_toggle_mode(bool enabled);
 
+/* Configure the key that cycles a group card's window: "above_tab" (the
+ * physical key above Tab, whatever the layout), an XKB keysym name such as
+ * "space", or "none". Shift+key cycles backward. */
+void input_set_group_cycle_key(const char *name);
+
 /* Reset modifier state (call when switcher shows to avoid stale detection) */
 void input_reset_alt_state(void);
 
