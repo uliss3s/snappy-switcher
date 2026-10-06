@@ -23,10 +23,30 @@
 </div>
 
 > [!NOTE]
-> This is a fork of [OpalAayan/snappy-switcher](https://github.com/OpalAayan/snappy-switcher)
-> that adds optional mouse support (hover to select, click to switch; enable it with
-> `mouse_support = true` in `[general]`). Everything else tracks upstream.
+> This is a fork of [OpalAayan/snappy-switcher](https://github.com/OpalAayan/snappy-switcher).
+> It tracks upstream and carries a few changes on top, listed in
+> [What's Different in This Fork](#whats-different-in-this-fork).
 > Versions are numbered `<upstream version>.<fork revision>`, e.g. `4.5.0.1`.
+
+---
+
+## What's Different in This Fork
+
+The keyboard stays the main way to drive the switcher; the mouse is an opt-in extra.
+Everything under [Key Features](#key-features) comes from upstream. On top of that, this fork adds:
+
+| Feature | What it does | Setting in `[general]` |
+|---------|--------------|------------------------|
+| **Group Cycling** | In `context` mode, a group card is no longer stuck on the group's most recent window. Select it and press the key above Tab (`` ` `` on US, `'` on ABNT2) to pick another of its windows; Shift goes back. Release the modifier or press Enter to switch to it. | `group_cycle_key = above_tab` (or any XKB key name, or `none`) |
+| **Mouse Support** | Hover a card to select it, left-click to switch to it. Works alongside the keyboard in both hold-to-switch and toggle mode. | `mouse_support = false` (opt-in) |
+| **Mouse Group Cycling** | With mouse support on, right-click a group card to cycle its windows, like the keyboard key; Shift+click goes back. | `group_cycle_button = right` (or `middle`, `side`, `extra`, `none`) |
+
+Other changes from upstream:
+
+- Group card badges show which window the card is on (`2/3`) instead of only the count (`3`).
+- Fix: the popup could stay frozen on its first frame, mostly with `follow_monitor = true`. It now waits for the compositor to configure the new size before drawing.
+
+See [CONFIGURATION.md](docs/CONFIGURATION.md) for the details of each setting.
 
 ---
 
@@ -34,11 +54,10 @@
 
 | Feature | Description |
 |---------|-------------|
-| **Context Grouping** | Tiled windows sharing the same workspace + app class are collapsed into a single card with a position badge (`1/3`). Press the key above Tab (Shift to go backward; configurable via `group_cycle_key`) to pick another window of the selected group. Floating windows are never grouped. |
+| **Context Grouping** | Tiled windows sharing the same workspace + app class are collapsed into a single card with a count badge. Floating windows are never grouped. |
 | **Dynamic Pango UI** | Cairo/Pango rendering pipeline with automatic grid scaling, HiDPI support, SVG/PNG icon resolution, and configurable workspace badges. |
 | **Silent & Linear Routing** | `--silent` performs an instant MRU switch without ever creating a Wayland surface. `--linear` bypasses MRU for deterministic workspace/address cycling. Combinable. |
 | **Dual-Track Dismiss** | Dismiss-on-release supports both XKB modifier masks (`alt`, `super`, `ctrl`, `shift`) and raw keycode tracking (`space`, `1`, `Return`, etc.). |
-| **Mouse Support** | Hover a card to highlight it, left-click to switch to it. Right-click a group card to cycle its windows, like the key above Tab (Shift+right-click backward; button configurable via `group_cycle_button`). Works alongside the keyboard in both hold-to-switch and toggle mode. Opt-in via `mouse_support = true`. |
 | **Rapid-Tap Safe** | The input engine distinguishes genuine config mismatches from rapid taps by inspecting the XKB depressed-modifier bitmask, eliminating false-alarm error banners. |
 | **15 Themes** | Ships with Catppuccin (Mocha/Latte/Frappe), Dracula, Nord, Nordic, Tokyo Night, Gruvbox, Rose Pine, Cyberpunk, Liquid Glass, and more. Full `.ini` customization. |
 | **Special Workspace Filter** | Excludes scratchpad/dropdown windows (`special:*`) from the switcher by default. Configurable via `ignore_special`. |
@@ -210,7 +229,7 @@ bindd = SUPER, Tab, Snappy Switcher Workspace Next, exec, snappy-switcher next -
 
 ### 3. Done
 
-Press your configured bind to see it in action. Navigate with Tab / arrow keys and press the key above Tab (`` ` `` on US layouts) on a grouped card to pick another window of the group (Shift goes back). Optionally, set `mouse_support = true` to hover a card with the mouse, left-click it to switch, and right-click a grouped card to cycle its windows.
+Press your configured bind to see it in action.
 
 ---
 
