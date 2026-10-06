@@ -65,6 +65,8 @@ typedef struct {
   bool mouse_support;  /* Hover/click on cards to select and switch */
   char group_cycle_key[32]; /* Key cycling a group card's window: "above_tab",
                                an XKB keysym name, or "none" */
+  char group_cycle_button[16]; /* Mouse button doing the same: "right",
+                                  "middle", "side", "extra", or "none" */
 
 } Config;
 

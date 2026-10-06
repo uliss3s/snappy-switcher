@@ -48,7 +48,9 @@ ignore_pinned = false
 # false = list special workspace windows like any other window
 ignore_special = true
 
-# Mouse support: hover a card to highlight it, left-click to switch to it
+# Mouse support: hover a card to highlight it, left-click to switch to it,
+# group_cycle_button on a group card (context mode) cycles its windows like
+# group_cycle_key does
 # true  = mouse works alongside the keyboard
 # false = keyboard only; the popup ignores the pointer entirely (default)
 mouse_support = false
@@ -60,6 +62,11 @@ mouse_support = false
 #   <keysym>  = any XKB key name, e.g. space, grave, apostrophe, q
 #   none      = disabled
 group_cycle_key = above_tab
+
+# Mouse button doing the same as group_cycle_key (needs mouse_support);
+# hold Shift to go backward
+#   right (default), middle, side (back), extra (forward), none
+group_cycle_button = right
 
 # ┌───────────────────────────────────────────────────────────────────────────┐
 # │                              THEME SETTINGS                               │

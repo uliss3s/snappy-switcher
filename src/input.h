@@ -31,6 +31,11 @@ void input_set_toggle_mode(bool enabled);
  * "space", or "none". Shift+key cycles backward. */
 void input_set_group_cycle_key(const char *name);
 
+/* Configure the mouse button doing the same (with mouse_support): "right",
+ * "middle", "side"/"back", "extra"/"forward", or "none". Left is reserved
+ * for switching. */
+void input_set_group_cycle_button(const char *name);
+
 /* Reset modifier state (call when switcher shows to avoid stale detection) */
 void input_reset_alt_state(void);
 
