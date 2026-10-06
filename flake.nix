@@ -25,7 +25,7 @@
         packages = rec {
           snappy-switcher = pkgs.stdenv.mkDerivation {
             pname = "snappy-switcher";
-            version = "4.5.0";
+            version = "4.5.0.1";
 
             src = pkgs.lib.cleanSource ./.;
 
@@ -95,7 +95,7 @@
 
             meta = with pkgs.lib; {
               description = "A fast, keyboard-driven window switcher for Wayland compositors";
-              homepage = "https://github.com/OpalAayan/snappy-switcher";
+              homepage = "https://github.com/uliss3s/snappy-switcher";
               license = licenses.gpl3;
               platforms = platforms.linux;
               maintainers = [ ];

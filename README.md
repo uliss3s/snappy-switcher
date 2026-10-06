@@ -7,7 +7,7 @@
 [![License](https://img.shields.io/badge/License-GPL3-blue?style=for-the-badge&logo=gnu)](LICENSE)
 [![Language](https://img.shields.io/badge/Language-C-orange?style=for-the-badge&logo=c)](https://en.cppreference.com/w/c)
 [![Platform](https://img.shields.io/badge/Platform-Hyprland-58E1FF?style=for-the-badge&logo=wayland)](https://hyprland.org/)
-[![Version](https://img.shields.io/badge/Version-4.5.0-success?style=for-the-badge)]()
+[![Version](https://img.shields.io/badge/Version-4.5.0.1-success?style=for-the-badge)]()
 [![AUR](https://img.shields.io/aur/version/snappy-switcher?color=blue&label=AUR&logo=arch-linux&style=for-the-badge)](https://aur.archlinux.org/packages/snappy-switcher)
 
 <br/>
@@ -21,6 +21,12 @@
  *Pure C · Wayland Layer Shell · Zero dependencies on Electron or GTK runtimes*
 
 </div>
+
+> [!NOTE]
+> This is a fork of [OpalAayan/snappy-switcher](https://github.com/OpalAayan/snappy-switcher)
+> that adds optional mouse support (hover to select, click to switch; enable it with
+> `mouse_support = true` in `[general]`). Everything else tracks upstream.
+> Versions are numbered `<upstream version>.<fork revision>`, e.g. `4.5.0.1`.
 
 ---
 
@@ -43,6 +49,10 @@
 ## Installation
 
 ### <img src="https://img.shields.io/badge/AUR-1793D1?style=flat&logo=archlinux&logoColor=white" height="20"/> Arch Linux (AUR)
+
+> [!IMPORTANT]
+> The AUR package builds upstream snappy-switcher, which doesn't include this fork's changes.
+> To get the fork, use **Build from PKGBUILD** below.
 
 <table>
 <tr>
@@ -69,7 +79,7 @@ paru -S snappy-switcher
 <summary><b>Build from PKGBUILD</b></summary>
 
 ```bash
-git clone https://github.com/OpalAayan/snappy-switcher.git
+git clone https://github.com/uliss3s/snappy-switcher.git
 cd snappy-switcher
 makepkg -si
 ```
@@ -95,7 +105,7 @@ sudo dnf install wayland-devel cairo-devel pango-devel json-c-devel libxkbcommon
 
 **Install with Flakes**
 ```bash
-nix profile install github:OpalAayan/snappy-switcher
+nix profile install github:uliss3s/snappy-switcher
 ```
 
 </td>
@@ -103,7 +113,7 @@ nix profile install github:OpalAayan/snappy-switcher
 
 **Run directly**
 ```bash
-nix run github:OpalAayan/snappy-switcher
+nix run github:uliss3s/snappy-switcher
 ```
 
 </td>
@@ -116,7 +126,7 @@ nix run github:OpalAayan/snappy-switcher
 ```nix
 # flake.nix
 {
-  inputs.snappy-switcher.url = "github:OpalAayan/snappy-switcher";
+  inputs.snappy-switcher.url = "github:uliss3s/snappy-switcher";
 }
 
 # configuration.nix
@@ -570,7 +580,7 @@ The project includes a unified debug/profiler tool at `./scripts/snappy-debug.sh
 ### Contributing
 
 ```bash
-git clone https://github.com/OpalAayan/snappy-switcher.git
+git clone https://github.com/uliss3s/snappy-switcher.git
 cd snappy-switcher
 make
 ```

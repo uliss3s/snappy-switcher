@@ -1,10 +1,11 @@
-# Maintainer: Opal Aayan <YougurtMyFace@proton.me>
+# Maintainer: Ulisses <urssilva@gmail.com>
+# Contributor: Opal Aayan <YougurtMyFace@proton.me>
 pkgname=snappy-switcher
-pkgver=4.5.0
+pkgver=4.5.0.1
 pkgrel=1
 pkgdesc="A fast, animated Alt+Tab window switcher for Hyprland with MRU sorting and context grouping"
 arch=('x86_64')
-url="https://github.com/OpalAayan/snappy-switcher"
+url="https://github.com/uliss3s/snappy-switcher"
 license=('GPL3')
 depends=(
   'wayland'

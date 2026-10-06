@@ -1,6 +1,6 @@
 [Unit]
 Description=Snappy Switcher - Alt+Tab Window Switcher for Hyprland
-Documentation=https://github.com/OpalAayan/snappy-switcher
+Documentation=https://github.com/uliss3s/snappy-switcher
 
 # Ordering: start after the graphical session is established
 After=graphical-session.target

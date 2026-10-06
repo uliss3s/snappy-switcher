@@ -1,4 +1,4 @@
-# Makefile - Snappy Switcher v4.5.0
+# Makefile - Snappy Switcher v4.5.0.1
 CC = gcc
 PKG_CFLAGS = $(shell pkg-config --cflags wayland-client cairo pango pangocairo json-c xkbcommon)
 PKG_LIBS = $(shell pkg-config --libs wayland-client wayland-cursor cairo pango pangocairo json-c xkbcommon glib-2.0 gobject-2.0)
@@ -97,7 +97,7 @@ src/%.o: src/%.c
 # ═══════════════════════════════════════════════════════════════════════════
 install: $(TARGET)
 	@echo "╔═══════════════════════════════════════════════════════════════╗"
-	@echo "║           Installing Snappy Switcher v4.5.0                   ║"
+	@echo "║           Installing Snappy Switcher v4.5.0.1                 ║"
 	@echo "╚═══════════════════════════════════════════════════════════════╝"
 	@echo ""
 	@echo "Installing binaries to $(BINDIR)..."
