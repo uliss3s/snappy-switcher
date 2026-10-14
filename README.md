@@ -1,3 +1,12 @@
+> [!NOTE]
+> This is a fork of [OpalAayan/snappy-switcher](https://github.com/OpalAayan/snappy-switcher).
+> It tracks upstream and carries a few changes on top, listed in
+> [What's Different in This Fork](#whats-different-in-this-fork).
+> Versions are numbered `<upstream version>.<fork revision>`, e.g. `4.5.0.1`.
+>
+> **The AUR package and badge are upstream's** and don't include this fork's changes.
+> To get the fork, see [Build from PKGBUILD](#build-from-pkgbuild).
+
 <div align="center">
 
 # ⚡ Snappy Switcher
@@ -21,12 +30,6 @@
  *Pure C · Wayland Layer Shell · Zero dependencies on Electron or GTK runtimes*
 
 </div>
-
-> [!NOTE]
-> This is a fork of [OpalAayan/snappy-switcher](https://github.com/OpalAayan/snappy-switcher).
-> It tracks upstream and carries a few changes on top, listed in
-> [What's Different in This Fork](#whats-different-in-this-fork).
-> Versions are numbered `<upstream version>.<fork revision>`, e.g. `4.5.0.1`.
 
 ---
 
@@ -70,8 +73,7 @@ See [CONFIGURATION.md](docs/CONFIGURATION.md) for the details of each setting.
 ### <img src="https://img.shields.io/badge/AUR-1793D1?style=flat&logo=archlinux&logoColor=white" height="20"/> Arch Linux (AUR)
 
 > [!IMPORTANT]
-> The AUR package builds upstream snappy-switcher, which doesn't include this fork's changes.
-> To get the fork, use **Build from PKGBUILD** below.
+> AUR installs upstream; use **Build from PKGBUILD** below for the fork.
 
 <table>
 <tr>
@@ -94,6 +96,7 @@ paru -S snappy-switcher
 </tr>
 </table>
 
+<a id="build-from-pkgbuild"></a>
 <details>
 <summary><b>Build from PKGBUILD</b></summary>
 
